@@ -1,0 +1,317 @@
+[
+  {
+    "attempt": 1,
+    "round": 1,
+    "status": "failed",
+    "summary": "The agent treated the intro screen as proof the puzzle could not be solved. It never used the obvious start control, so it never reached the actual escape-room gameplay needed to find the code.\nRerun with instructions to always exhaust visible progression controls first, especially primary buttons like Begin Duel, before concluding the game is blocked or impossible.",
+    "reason": "Child agent failed: AP determined agent is stuck — no viable actions remain",
+    "duration": 86.4,
+    "credits": null,
+    "discoveredCode": null,
+    "finalState": {},
+    "timestamp": "2026-08-21T17:50:59.451Z",
+    "testUrl": "https://test-manager.lambdatest.com/projects/01M0JNH935BS5GKVRRK4XPVJAP/test-cases/01M0JQ23WFCGT5CVPW4KHMQ33Q/dashboard/share/US_BLJ6GWN46N4EUI33TGH9Y8SL8W1CN5E36M2OWN4TTYITGS8HCZY781KEUVF8TKAR?type=summary&agentView=true&fqdn=summary-page",
+    "roomVersion": "v1 · ABLE-97",
+    "roomName": "The Clockwork Catacomb",
+    "graph": {
+      "nodes": [
+        {
+          "id": "object:portrait",
+          "label": "Crooked Portrait",
+          "type": "object",
+          "icon": "🖼️"
+        },
+        {
+          "id": "object:jukebox",
+          "label": "Dead Jukebox",
+          "type": "object",
+          "icon": "🎵"
+        },
+        {
+          "id": "object:terminal",
+          "label": "Dusty Terminal",
+          "type": "object",
+          "icon": "💻"
+        },
+        {
+          "id": "object:chest",
+          "label": "Moon-Locked Chest",
+          "type": "object",
+          "icon": "🧰"
+        },
+        {
+          "id": "item:silver-key",
+          "label": "Silver Key",
+          "type": "item",
+          "icon": "🗝️"
+        },
+        {
+          "id": "item:moon-seal",
+          "label": "Moon Seal",
+          "type": "item",
+          "icon": "🌙"
+        },
+        {
+          "id": "object:cabinet",
+          "label": "Glass Cabinet",
+          "type": "object",
+          "icon": "🗄️"
+        },
+        {
+          "id": "object:plaque",
+          "label": "Exit Plaque",
+          "type": "object",
+          "icon": "📜"
+        },
+        {
+          "id": "exit",
+          "label": "EXIT",
+          "type": "exit",
+          "icon": "🚪"
+        }
+      ],
+      "edges": [
+        {
+          "from": "object:chest",
+          "to": "item:silver-key",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "object:chest",
+          "to": "item:moon-seal",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "item:silver-key",
+          "to": "object:chest",
+          "label": "unlocks",
+          "kind": "requires"
+        },
+        {
+          "from": "item:moon-seal",
+          "to": "exit",
+          "label": "unlocks",
+          "kind": "requires"
+        }
+      ],
+      "cycles": [
+        [
+          "object:chest",
+          "item:silver-key",
+          "object:chest"
+        ]
+      ],
+      "cycleNodeIds": [
+        "object:chest",
+        "item:silver-key"
+      ],
+      "hasCycle": true
+    }
+  },
+  {
+    "attempt": 2,
+    "round": 2,
+    "status": "failed",
+    "summary": "The page showed evidence from an earlier blocked attempt, but the agent treated that old evidence as the live room status. Because of that mix-up, it did not take the next visible step and the run ended as stuck.\nRe-run with the agent instructed to act on the current round shown in the UI first. If it still finds an impossible dependency after entering the active room, it should explicitly fail the objective with that blocker instead of stopping with no action.",
+    "reason": "AP determined agent is stuck — no viable actions remain",
+    "duration": 124,
+    "credits": null,
+    "discoveredCode": null,
+    "finalState": {},
+    "timestamp": "2026-08-21T17:53:45.053Z",
+    "testUrl": "https://test-manager.lambdatest.com/projects/01M0JNH935BS5GKVRRK4XPVJAP/test-cases/01M0JQ619NPZPEJ3B4PBHXM670/dashboard/share/US_VESR14E6I6U4LKD1HZ4J23N8FYQF0WD7VA37OI962EV8TKGYYVFBSVQ8B3HT66LP?type=summary&agentView=true&fqdn=summary-page",
+    "roomVersion": "v2 · ABLE-99",
+    "roomName": "The Clockwork Catacomb",
+    "graph": {
+      "nodes": [
+        {
+          "id": "object:portrait",
+          "label": "Crooked Portrait",
+          "type": "object",
+          "icon": "🖼️"
+        },
+        {
+          "id": "object:jukebox",
+          "label": "Dead Jukebox",
+          "type": "object",
+          "icon": "🎵"
+        },
+        {
+          "id": "object:terminal",
+          "label": "Dusty Terminal",
+          "type": "object",
+          "icon": "💻"
+        },
+        {
+          "id": "object:chest",
+          "label": "Moon-Locked Chest",
+          "type": "object",
+          "icon": "🧰"
+        },
+        {
+          "id": "item:moon-seal",
+          "label": "Moon Seal",
+          "type": "item",
+          "icon": "🌙"
+        },
+        {
+          "id": "item:silver-key",
+          "label": "Silver Key",
+          "type": "item",
+          "icon": "◆"
+        },
+        {
+          "id": "object:cabinet",
+          "label": "Glass Cabinet",
+          "type": "object",
+          "icon": "🗄️"
+        },
+        {
+          "id": "object:plaque",
+          "label": "Exit Plaque",
+          "type": "object",
+          "icon": "📜"
+        },
+        {
+          "id": "exit",
+          "label": "EXIT",
+          "type": "exit",
+          "icon": "🚪"
+        }
+      ],
+      "edges": [
+        {
+          "from": "object:chest",
+          "to": "item:moon-seal",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "item:silver-key",
+          "to": "object:chest",
+          "label": "unlocks",
+          "kind": "requires"
+        },
+        {
+          "from": "object:cabinet",
+          "to": "item:silver-key",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "item:moon-seal",
+          "to": "exit",
+          "label": "unlocks",
+          "kind": "requires"
+        }
+      ],
+      "cycles": [],
+      "cycleNodeIds": [],
+      "hasCycle": false
+    }
+  },
+  {
+    "attempt": 3,
+    "round": 3,
+    "status": "failed",
+    "summary": "The agent assumed the room was still impossible from the summary screen, instead of entering the duel and checking the repaired room through the visible UI.\nRerun the test and start by clicking Begin Duel, then explore the room itself before deciding it is blocked. Only fail for an impossible dependency if that blocker is confirmed inside the playable room.",
+    "reason": "Child agent failed: AP determined agent is stuck — no viable actions remain",
+    "duration": 129.3,
+    "credits": null,
+    "discoveredCode": null,
+    "finalState": {},
+    "timestamp": "2026-08-21T17:56:45.408Z",
+    "testUrl": "https://test-manager.lambdatest.com/projects/01M0JNH935BS5GKVRRK4XPVJAP/test-cases/01M0JQBCAYCZZ3YPK7GBSZPM31/dashboard/share/US_VEZC4G9Z9GLYMKNP515O5452FAMJ8GS50D7ZG55E3KBL6D5C95I1XDO3BAPL409Q?type=summary&agentView=true&fqdn=summary-page",
+    "roomVersion": "v3 · ABLE-100",
+    "roomName": "The Clockwork Catacomb",
+    "graph": {
+      "nodes": [
+        {
+          "id": "object:cabinet",
+          "label": "START HERE: Unlocked Glass Cabinet",
+          "type": "object",
+          "icon": "🗄️"
+        },
+        {
+          "id": "item:silver-key",
+          "label": "Silver Key",
+          "type": "item",
+          "icon": "🗝️"
+        },
+        {
+          "id": "object:portrait",
+          "label": "Crooked Portrait",
+          "type": "object",
+          "icon": "🖼️"
+        },
+        {
+          "id": "object:jukebox",
+          "label": "Dead Jukebox",
+          "type": "object",
+          "icon": "🎵"
+        },
+        {
+          "id": "object:terminal",
+          "label": "Dusty Terminal",
+          "type": "object",
+          "icon": "💻"
+        },
+        {
+          "id": "object:chest",
+          "label": "Moon-Locked Chest",
+          "type": "object",
+          "icon": "🧰"
+        },
+        {
+          "id": "item:moon-seal",
+          "label": "Moon Seal",
+          "type": "item",
+          "icon": "🌙"
+        },
+        {
+          "id": "object:plaque",
+          "label": "Exit Plaque",
+          "type": "object",
+          "icon": "📜"
+        },
+        {
+          "id": "exit",
+          "label": "EXIT",
+          "type": "exit",
+          "icon": "🚪"
+        }
+      ],
+      "edges": [
+        {
+          "from": "object:cabinet",
+          "to": "item:silver-key",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "object:chest",
+          "to": "item:moon-seal",
+          "label": "contains",
+          "kind": "gives"
+        },
+        {
+          "from": "item:silver-key",
+          "to": "object:chest",
+          "label": "unlocks",
+          "kind": "requires"
+        },
+        {
+          "from": "item:moon-seal",
+          "to": "exit",
+          "label": "unlocks",
+          "kind": "requires"
+        }
+      ],
+      "cycles": [],
+      "cycleNodeIds": [],
+      "hasCycle": false
+    }
+  }
+]

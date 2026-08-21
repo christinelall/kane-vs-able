@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Kane vs. ABLE — can one AI build an escape room another AI can prove is solvable?"
+    />
+    <title>Kane vs. ABLE</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">TESTMU AI KANE CLI CHALLENGE</p>
+        <h1><span class="kane">KANE</span> <span class="versus">vs.</span> <span class="able">ABLE</span></h1>
+        <p class="tagline">Can an AI build an escape room another AI can prove is solvable?</p>
+      </div>
+      <div class="header-badge" id="room-version">ROOM —</div>
+    </header>
+
+    <main class="app-shell">
+      <section class="game-panel" aria-labelledby="room-title">
+        <section class="duel-command">
+          <div>
+            <p class="section-label">AUTONOMOUS CLOSED LOOP</p>
+            <h2 id="duel-phase">Ready to duel</h2>
+            <p id="duel-message">Kane will play. If Kane fails, ABLE will receive the evidence, repair the room, and Kane will re-enter.</p>
+          </div>
+          <div class="duel-actions">
+            <button class="reset-demo-button" id="reset-demo" type="button">RESET DEMO</button>
+            <button class="duel-button" id="begin-duel" type="button">
+              <span class="duel-button-icon">⚔</span>
+              BEGIN DUEL
+            </button>
+          </div>
+        </section>
+
+        <div class="room-heading">
+          <div>
+            <p class="section-label">CURRENT CHALLENGE</p>
+            <h2 id="room-title">Loading dungeon…</h2>
+            <p id="room-description" class="room-description"></p>
+          </div>
+          <button class="ghost-button" id="reset-game" type="button">Reset player</button>
+        </div>
+
+        <div class="challenge-strip">
+          <div>
+            <span class="strip-label">EXIT SEQUENCE</span>
+            <strong id="exit-sequence">—</strong>
+          </div>
+          <div>
+            <span class="strip-label">ABLE'S CLAIM</span>
+            <strong id="able-confidence">—</strong>
+          </div>
+          <div>
+            <span class="strip-label">KANE STATUS</span>
+            <strong id="kane-status">Awaiting verification</strong>
+          </div>
+          <div class="code-result-cell">
+            <span class="strip-label">KANE DISCOVERED</span>
+            <div class="code-digits" id="discovered-code" aria-label="Kane discovered exit code">
+              <span>—</span><span>—</span><span>—</span><span>—</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="graph-section">
+          <div class="graph-heading">
+            <div>
+              <p class="section-label">KANE'S STRUCTURAL EVIDENCE</p>
+              <h2>Dungeon dependency graph</h2>
+            </div>
+            <p>Red nodes mark a dependency cycle. After ABLE repairs the room, the verified graph appears beside it.</p>
+          </div>
+          <div class="graph-grid">
+            <article class="graph-card">
+              <div class="graph-card-title">
+                <span id="before-graph-label">BEFORE</span>
+                <strong id="before-graph-verdict">Awaiting first attempt</strong>
+              </div>
+              <svg id="before-graph" viewBox="0 0 520 300" role="img" aria-label="Dependency graph before repair"></svg>
+            </article>
+            <article class="graph-card">
+              <div class="graph-card-title">
+                <span id="after-graph-label">AFTER</span>
+                <strong id="after-graph-verdict">Awaiting ABLE repair</strong>
+              </div>
+              <svg id="after-graph" viewBox="0 0 520 300" role="img" aria-label="Dependency graph after repair"></svg>
+            </article>
+          </div>
+        </section>
+
+        <div class="room-stage" id="room-stage" aria-live="polite"></div>
+
+        <section class="exit-console" aria-label="Exit door console">
+          <div class="exit-icon" aria-hidden="true">🚪</div>
+          <div class="exit-copy">
+            <span class="section-label">THE EXIT</span>
+            <h3>Final Lock</h3>
+            <p id="exit-requirement">The mechanism is waiting.</p>
+          </div>
+          <form id="exit-form" class="keypad-form">
+            <label for="exit-code">4-digit code</label>
+            <div class="keypad-row">
+              <input
+                id="exit-code"
+                name="exit-code"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="4"
+                autocomplete="off"
+                placeholder="••••"
+                aria-label="Four digit exit code"
+              />
+              <button type="submit" class="unlock-button">UNLOCK</button>
+            </div>
+          </form>
+        </section>
+
+        <div class="play-state-grid">
+          <section class="state-card">
+            <span class="section-label">INVENTORY</span>
+            <div id="inventory" class="chip-list">
+              <span class="empty-state">Nothing yet.</span>
+            </div>
+          </section>
+
+          <section class="state-card">
+            <span class="section-label">CLUES DISCOVERED</span>
+            <div id="clues" class="clue-list">
+              <span class="empty-state">The room is keeping its secrets.</span>
+            </div>
+          </section>
+        </div>
+
+        <section class="activity-card">
+          <span class="section-label">PLAYER FIELD NOTES</span>
+          <div id="activity-log" class="activity-log" role="log" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <aside class="control-panel">
+        <section class="able-card">
+          <div class="agent-heading">
+            <div class="agent-avatar able-avatar sprite-avatar" id="able-avatar">
+              <img id="able-sprite" src="./assets/sprites/able/smug.png" alt="ABLE, the AI Dungeon Master" />
+            </div>
+            <div>
+              <span class="section-label">AI DUNGEON MASTER</span>
+              <h2>ABLE</h2>
+              <p>Artificial Builder of Labyrinthine Escapes</p>
+              <div class="able-title" id="able-title">MASTER OF THE DUNGEON</div>
+            </div>
+          </div>
+          <div class="able-mood-row">
+            <span>STATE</span>
+            <strong id="able-state">SMUG</strong>
+          </div>
+          <blockquote id="able-message">“I am preparing something unnecessarily elaborate.”</blockquote>
+          <div class="confidence-meter" aria-label="ABLE confidence">
+            <div class="confidence-fill" id="confidence-fill"></div>
+          </div>
+          <div class="confidence-label">
+            <span>Confidence</span>
+            <strong id="confidence-number">—</strong>
+          </div>
+        </section>
+
+        <section class="duel-feed-card">
+          <div class="card-heading">
+            <div>
+              <span class="section-label">LIVE DUEL</span>
+              <h2>Kane ↔ ABLE</h2>
+            </div>
+            <div class="pulse-dot" id="duel-pulse" title="Duel status"></div>
+          </div>
+          <div class="duel-character-stage" aria-label="Kane versus ABLE character status">
+            <div class="duel-character kane-character">
+              <div class="duel-sprite-frame kane-frame">
+                <img id="duel-kane-sprite" src="./assets/sprites/kane/idle.png" alt="Kane verifier AI" />
+              </div>
+              <strong>KANE</strong>
+              <span id="kane-sprite-status">READY</span>
+            </div>
+            <div class="pixel-versus" aria-hidden="true">VS</div>
+            <div class="duel-character able-character">
+              <div class="duel-sprite-frame able-frame">
+                <img id="duel-able-sprite" src="./assets/sprites/able/smug.png" alt="ABLE Dungeon Master AI" />
+              </div>
+              <strong>ABLE</strong>
+              <span id="able-sprite-status">SMUG</span>
+            </div>
+          </div>
+          <div id="duel-feed" class="duel-feed">
+            <div class="history-empty">Press BEGIN DUEL to start the argument.</div>
+          </div>
+        </section>
+
+        <section class="verification-card">
+          <div class="card-heading">
+            <div>
+              <span class="section-label">EVIDENCE</span>
+              <h2>Verification history</h2>
+            </div>
+          </div>
+          <div id="verification-history" class="history-list">
+            <div class="history-empty">No Kane attempts yet.</div>
+          </div>
+        </section>
+
+        <section class="able-stats-card">
+          <div class="card-heading">
+            <div>
+              <span class="section-label">ABLE'S RECORD</span>
+              <h2>Dignity metrics</h2>
+            </div>
+          </div>
+          <div class="able-stats-grid">
+            <div><span>Dungeon versions</span><strong id="stat-versions">1</strong></div>
+            <div><span>Initial confidence</span><strong id="stat-initial-confidence">—</strong></div>
+            <div><span>Lowest confidence</span><strong id="stat-lowest-confidence">—</strong></div>
+            <div><span>Design anomalies</span><strong id="stat-anomalies">0</strong></div>
+            <div><span>Repairs required</span><strong id="stat-repairs">0</strong></div>
+            <div><span>Times admitting fault</span><strong id="stat-admits">0</strong></div>
+          </div>
+        </section>
+
+        <section class="loop-card">
+          <span class="section-label">THE LOOP</span>
+          <ol>
+            <li><strong>ABLE</strong> creates a room.</li>
+            <li><strong>KANE</strong> attempts it through Chrome.</li>
+            <li>Kane stores the code it independently derives.</li>
+            <li>A failure becomes structured evidence.</li>
+            <li><strong>ABLE</strong> repairs the room, not the test.</li>
+            <li><strong>KANE</strong> re-enters and proves the repair.</li>
+          </ol>
+        </section>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="win-overlay" id="win-overlay" hidden>
+      <div class="win-card">
+        <div class="win-character-stage" aria-hidden="true">
+          <img class="win-kane-sprite" src="./assets/sprites/kane/victory.png" alt="" />
+          <div class="win-vs">1–0</div>
+          <img class="win-able-sprite" src="./assets/sprites/able/glitch.png" alt="" />
+        </div>
+        <div class="win-mark">✓</div>
+        <p class="eyebrow">KANE WINS THIS ROUND</p>
+        <h2>YOU ESCAPED</h2>
+        <p>The dungeon is browser-solvable. ABLE is pretending this was intentional.</p>
+        <div class="win-able-quote">ABLE: “Independent verification complete. The repair is an implementation detail.”</div>
+        <button id="close-win" class="unlock-button" type="button">Inspect the evidence</button>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

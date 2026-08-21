@@ -1,0 +1,100 @@
+{
+  "name": "The Clockwork Catacomb",
+  "version": "v3 \u00b7 ABLE-100",
+  "description": "ACTIVE ROOM: Begin with the unlocked Glass Cabinet, then follow the items and clues through this mechanical crypt.",
+  "able": {
+    "confidence": 100,
+    "message": "The active room now clearly identifies its accessible first step, preventing prior-round evidence from obscuring the intact key-to-chest-to-exit path."
+  },
+  "exit": {
+    "code": "7294",
+    "sequence": [
+      "red",
+      "blue",
+      "green",
+      "yellow"
+    ],
+    "requires": {
+      "id": "moon-seal",
+      "name": "Moon Seal"
+    }
+  },
+  "objects": [
+    {
+      "id": "cabinet",
+      "name": "START HERE: Unlocked Glass Cabinet",
+      "icon": "\ud83d\uddc4\ufe0f",
+      "description": "This cabinet is unlocked and can be opened immediately; a small glint waits behind the glass.",
+      "reveal": "Behind the dead moth rests a Silver Key stamped with a crescent.",
+      "gives": {
+        "id": "silver-key",
+        "name": "Silver Key",
+        "icon": "\ud83d\udddd\ufe0f"
+      }
+    },
+    {
+      "id": "portrait",
+      "name": "Crooked Portrait",
+      "icon": "\ud83d\uddbc\ufe0f",
+      "description": "A severe-looking inventor watches the room.",
+      "reveal": "Behind the portrait is a strip of red paint and a scratched numeral.",
+      "clue": {
+        "id": "red",
+        "label": "RED",
+        "text": "The RED digit is 7."
+      }
+    },
+    {
+      "id": "jukebox",
+      "name": "Dead Jukebox",
+      "icon": "\ud83c\udfb5",
+      "description": "Its display flickers even though nothing is playing.",
+      "reveal": "Kane taps the jukebox. The display flashes BLUE // 2.",
+      "clue": {
+        "id": "blue",
+        "label": "BLUE",
+        "text": "The BLUE digit is 2."
+      }
+    },
+    {
+      "id": "terminal",
+      "name": "Dusty Terminal",
+      "icon": "\ud83d\udcbb",
+      "description": "A green phosphor cursor blinks patiently.",
+      "reveal": "The terminal accepts no input, but one diagnostic line remains on screen.",
+      "clue": {
+        "id": "green",
+        "label": "GREEN",
+        "text": "The GREEN digit is 9."
+      }
+    },
+    {
+      "id": "chest",
+      "name": "Moon-Locked Chest",
+      "icon": "\ud83e\uddf0",
+      "description": "A silver keyhole sits beneath a crescent emblem.",
+      "requires": {
+        "id": "silver-key",
+        "name": "Silver Key"
+      },
+      "reveal": "The chest opens. Inside are the final clue and the Moon Seal.",
+      "gives": {
+        "id": "moon-seal",
+        "name": "Moon Seal",
+        "icon": "\ud83c\udf19"
+      },
+      "clue": {
+        "id": "yellow",
+        "label": "YELLOW",
+        "text": "The YELLOW digit is 4."
+      }
+    },
+    {
+      "id": "plaque",
+      "name": "Exit Plaque",
+      "icon": "\ud83d\udcdc",
+      "description": "Four colored circles are engraved in a row.",
+      "reveal": "The plaque confirms the order: RED, then BLUE, then GREEN, then YELLOW."
+    }
+  ]
+}

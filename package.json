@@ -1,0 +1,18 @@
+{
+  "name": "kane-vs-able",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Kane vs. ABLE \u2014 an AI Dungeon Master creates browser escape rooms and Kane proves whether they are solvable.",
+  "scripts": {
+    "start": "node scripts/server.mjs",
+    "serve": "node scripts/server.mjs",
+    "demo:prepare": "node scripts/reset-history.mjs && node scripts/select-room.mjs broken",
+    "room:broken": "node scripts/select-room.mjs broken",
+    "room:fixed": "node scripts/select-room.mjs fixed",
+    "verify:kane": "node scripts/run-kane.mjs",
+    "test:kane": "kane-cli testmd run tests/escape-room_test.md",
+    "verify:reset": "node scripts/reset-history.mjs",
+    "duel": "node scripts/duel.mjs"
+  }
+}
