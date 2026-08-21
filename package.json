@@ -1,6 +1,6 @@
 {
   "name": "kane-vs-able",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Kane vs. ABLE \u2014 an AI Dungeon Master creates browser escape rooms and Kane proves whether they are solvable.",

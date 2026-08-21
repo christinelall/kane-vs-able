@@ -17,6 +17,61 @@ The included demo room starts with a genuine circular item dependency so the fir
 
 ---
 
+## Quick Start
+
+### Prerequisites
+
+The web app itself has no npm dependencies, but the full autonomous duel requires these tools to already be installed and authenticated:
+
+- Node.js
+- Google Chrome
+- Kane CLI authenticated with TestMu AI
+- Codex CLI authenticated with OpenAI
+
+Install and authenticate Kane:
+
+```bash
+npm install -g @testmuai/kane-cli
+kane-cli login
+```
+
+Install and authenticate Codex:
+
+```bash
+npm install -g @openai/codex
+codex login
+```
+
+### Run the app
+
+From the project folder:
+
+```bash
+npm start
+```
+
+Then open:
+
+```text
+http://localhost:4173
+```
+
+For the demo flow:
+
+1. Click **RESET DEMO**.
+2. Click **BEGIN DUEL**.
+3. Kane attempts the dungeon in Chrome.
+4. If Kane fails, its structured result is passed to ABLE.
+5. ABLE uses Codex to repair `rooms/current-room.json`.
+6. Kane automatically re-enters and verifies the repaired dungeon.
+
+> Once Kane and Codex are installed and authenticated, the application itself runs with a single command: `npm start`.
+
+### Important
+
+`npm start` does **not** install or authenticate Kane or Codex. A fresh machine must complete the prerequisite setup above before the autonomous duel can work.
+
+
 ## Requirements
 
 - Node.js (Node 20+ recommended)
@@ -42,7 +97,7 @@ npx @testmuai/kane-cli-skill
 
 ## Run the app
 
-There are intentionally **no application dependencies** to install.
+There are intentionally **no project-level application dependencies** to install.
 
 ```bash
 npm start
@@ -54,7 +109,7 @@ Then open:
 http://localhost:4173
 ```
 
-The project uses a tiny Node static server so you do not have to spend hackathon time learning a framework or build tool.
+The project uses a tiny Node static server, so no framework or build-tool setup is required.
 
 ---
 
