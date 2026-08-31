@@ -15,7 +15,7 @@ npm start
 Open:
 
 ```text
-http://localhost:4173
+http://localhost:4173/play
 ```
 
 ### Terminal 2 — prepare the deliberately broken room

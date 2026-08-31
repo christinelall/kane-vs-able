@@ -7,13 +7,20 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const port = Number(process.env.PORT || 4173);
+const host = process.env.HOST || "0.0.0.0";
 const statePath = path.join(root, "verification", "duel-state.json");
 const historyPath = path.join(root, "verification", "history.json");
 const feedbackPath = path.join(root, "verification", "kane-feedback.md");
 const brokenRoomPath = path.join(root, "rooms", "templates", "broken-room.json");
 const currentRoomPath = path.join(root, "rooms", "current-room.json");
+const cloudRuntime = Boolean(process.env.RAILWAY_ENVIRONMENT) || Boolean(process.env.RENDER);
+const liveDuelEnabled = process.env.LIVE_DUEL_ENABLED == null
+  ? !cloudRuntime
+  : process.env.LIVE_DUEL_ENABLED === "1";
+const duelCooldownMs = Math.max(0, Number(process.env.DUEL_COOLDOWN_SECONDS || 0) * 1000);
 
 let duelProcess = null;
+let lastDuelStartedAt = 0;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -37,12 +44,70 @@ function jsonResponse(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function commandExists(command) {
+  return new Promise((resolve) => {
+    const probe = spawn(process.platform === "win32" ? "where" : "sh", process.platform === "win32" ? [command] : ["-lc", `command -v ${command}`], {
+      stdio: "ignore",
+      shell: false,
+    });
+    probe.on("error", () => resolve(false));
+    probe.on("close", (code) => resolve(code === 0));
+  });
+}
+
+async function runtimeStatus() {
+  const [kaneInstalled, codexInstalled] = await Promise.all([
+    commandExists(process.platform === "win32" ? "kane-cli.cmd" : "kane-cli"),
+    commandExists(process.platform === "win32" ? "codex.cmd" : "codex"),
+  ]);
+
+  return {
+    ok: true,
+    liveDuelEnabled,
+    duelRunning: Boolean(duelProcess),
+    host,
+    port,
+    playerPath: "/play",
+    headless: process.env.KANE_HEADLESS === "1" || Boolean(process.env.RAILWAY_ENVIRONMENT) || Boolean(process.env.RENDER),
+    kane: {
+      installed: kaneInstalled,
+      authMode:
+        (process.env.KANE_USERNAME || process.env.LT_USERNAME) &&
+        (process.env.KANE_ACCESS_KEY || process.env.LT_ACCESS_KEY)
+          ? "environment credentials"
+          : "stored profile / not checked",
+    },
+    able: {
+      codexInstalled,
+      authMode: process.env.OPENAI_API_KEY
+        ? "API key environment"
+        : process.env.CODEX_ACCESS_TOKEN
+          ? "Codex access token environment"
+          : "stored login / not checked",
+    },
+  };
+}
+
 async function startDuel(res) {
+  if (!liveDuelEnabled) {
+    jsonResponse(res, 503, { ok: false, error: "Live duel is disabled on this deployment." });
+    return;
+  }
+
   if (duelProcess) {
     jsonResponse(res, 409, { ok: false, error: "A duel is already running." });
     return;
   }
 
+  const now = Date.now();
+  if (duelCooldownMs && now - lastDuelStartedAt < duelCooldownMs) {
+    const retryAfter = Math.ceil((duelCooldownMs - (now - lastDuelStartedAt)) / 1000);
+    res.setHeader("Retry-After", String(retryAfter));
+    jsonResponse(res, 429, { ok: false, error: `Duel cooldown active. Try again in ${retryAfter}s.` });
+    return;
+  }
+
+  lastDuelStartedAt = now;
   duelProcess = spawn(process.execPath, ["scripts/duel.mjs"], {
     cwd: root,
     env: process.env,
@@ -107,8 +172,18 @@ async function resetDemo(res) {
 
 const server = http.createServer(async (req, res) => {
   try {
-    const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+    const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${port}`}`);
     const pathname = decodeURIComponent(requestUrl.pathname);
+
+    if (req.method === "GET" && pathname === "/health") {
+      jsonResponse(res, 200, { ok: true, service: "kane-vs-able" });
+      return;
+    }
+
+    if (req.method === "GET" && pathname === "/api/runtime-status") {
+      jsonResponse(res, 200, await runtimeStatus());
+      return;
+    }
 
     if (req.method === "POST" && pathname === "/api/duel") {
       await startDuel(res);
@@ -142,6 +217,7 @@ const server = http.createServer(async (req, res) => {
 
     let fileRequest = pathname;
     if (fileRequest === "/") fileRequest = "/index.html";
+    if (fileRequest === "/play" || fileRequest === "/play/") fileRequest = "/play.html";
 
     const candidate = path.resolve(root, `.${fileRequest}`);
     if (!candidate.startsWith(root + path.sep) && candidate !== root) {
@@ -175,10 +251,11 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, host, () => {
   console.log("");
   console.log("KANE vs. ABLE is running.");
-  console.log(`Open: http://localhost:${port}`);
+  console.log(`Dashboard: http://localhost:${port}`);
+  console.log(`Kane player surface: http://localhost:${port}/play`);
+  console.log(`Listening on ${host}:${port}`);
   console.log("");
-  console.log("The BEGIN DUEL button can now launch Kane from the browser.");
 });

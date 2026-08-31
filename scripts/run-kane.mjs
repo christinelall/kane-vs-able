@@ -15,20 +15,33 @@ const rawPath = path.join(verificationDir, "raw-kane.ndjson");
 const duelStatePath = path.join(verificationDir, "duel-state.json");
 const roomPath = path.join(root, "rooms", "current-room.json");
 
-const appUrl = process.env.APP_URL || "http://localhost:4173";
+const port = Number(process.env.PORT || 4173);
+const appUrl =
+  process.env.KANE_PLAY_URL ||
+  process.env.APP_URL ||
+  `http://127.0.0.1:${port}/play`;
 const managed = process.env.DUEL_MANAGED === "1";
 const managedRound = Number(process.env.DUEL_ROUND || 0);
+const headless =
+  process.env.KANE_HEADLESS === "1" ||
+  Boolean(process.env.RAILWAY_ENVIRONMENT) ||
+  Boolean(process.env.RENDER);
+const kaneUsername = process.env.KANE_USERNAME || process.env.LT_USERNAME || "";
+const kaneAccessKey = process.env.KANE_ACCESS_KEY || process.env.LT_ACCESS_KEY || "";
 
 const objective = [
-  `Go to ${appUrl}.`,
-  "You are KANE, challenging the AI Dungeon Master ABLE.",
-  "Solve the escape room entirely through the visible browser UI.",
-  "Explore useful interactive objects, collect items, unlock dependent objects,",
-  "and use the visible color sequence plus discovered clues to determine the four-digit exit code.",
-  "Once you have independently determined that code, store it as 'discovered_code'.",
-  'Then enter the code and verify that the page displays "YOU ESCAPED".',
-  "Do not inspect source files or developer tools and do not assume the solution.",
-  "If a gameplay dependency makes the room logically impossible, fail the objective and explain the blocking dependency."
+  "You are KANE, independently verifying an escape room created by ABLE.",
+  "You are already on the player-only dungeon page. There are no orchestration controls on this page.",
+  "Solve the room only through visible browser interactions. Do not inspect source files, network data, developer tools, or hidden application state.",
+  "Inspect every visible room object at least once before declaring the room impossible.",
+  "If an object is locked, record what item it requires, then continue inspecting every other visible object that can still be attempted.",
+  "Collect items and clues only when the UI visibly reveals them.",
+  "The final keypad uses the visible color sequence. Derive each digit only from clues you actually discovered; do not guess missing digits.",
+  "Once you have independently derived the complete four-digit code, store it as 'discovered_code'.",
+  'Enter that code and verify the page displays "YOU ESCAPED".',
+  "Only fail as logically impossible after every visible room object has been attempted and a required item or clue still has no reachable acquisition path.",
+  "When failing for impossibility, explain the observed blocking dependency using the object and item names shown in the browser.",
+  "If you determine the room is logically impossible after exhausting the visible objects, immediately end the run as FAILED. Do not keep clicking, retrying, or guessing. State LOGICALLY IMPOSSIBLE and name the blocking dependency.",
 ].join(" ");
 
 async function readJson(file, fallback) {
@@ -80,18 +93,32 @@ await fs.writeFile(rawPath, "");
 
 console.log("");
 console.log("KANE vs. ABLE — verification run");
-console.log(`Target: ${appUrl}`);
+console.log(`Player target: ${appUrl}`);
+console.log(`Browser mode: ${headless ? "headless" : "headed"}`);
+console.log(`Kane auth: ${kaneUsername && kaneAccessKey ? "per-run basic auth" : "stored profile"}`);
 console.log("");
 
 await updateDuelState({
   running: true,
   phase: "kane_running",
   round: managedRound || undefined,
-  message: "Kane is exploring the dungeon through Chrome.",
+  message: "Kane is exploring the player-only dungeon through Chrome.",
 });
 
 const command = process.platform === "win32" ? "kane-cli.cmd" : "kane-cli";
-const child = spawn(command, ["run", objective, "--agent"], {
+const kaneArgs = [
+  "run", objective,
+  "--url", appUrl,
+  "--agent",
+  "--max-steps", process.env.KANE_MAX_STEPS || "40",
+  "--timeout", process.env.KANE_TIMEOUT || "120",
+];
+if (headless) kaneArgs.push("--headless");
+if (kaneUsername && kaneAccessKey) {
+  kaneArgs.push("--username", kaneUsername, "--access-key", kaneAccessKey);
+}
+
+const child = spawn(command, kaneArgs, {
   cwd: root,
   stdio: ["ignore", "pipe", "inherit"],
   shell: false,
@@ -154,12 +181,7 @@ const exitCode = await new Promise((resolve, reject) => {
     "",
     `Could not start Kane CLI: ${error.message}`,
     "",
-    "This is not a dungeon-design failure. Check that Kane is installed and authenticated:",
-    "",
-    "```bash",
-    "kane-cli --help",
-    "kane-cli whoami",
-    "```",
+    "This is not a dungeon-design failure. Check that Kane is installed and authenticated.",
     "",
   ].join("\n");
 
@@ -225,6 +247,8 @@ const entry = {
   testUrl: runEnd.test_url || null,
   roomVersion: roomSnapshot.version || null,
   roomName: roomSnapshot.name || null,
+  playerUrl: appUrl,
+  browserMode: headless ? "headless" : "headed",
   graph,
 };
 

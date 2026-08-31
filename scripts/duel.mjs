@@ -259,6 +259,25 @@ async function main() {
       process.exit(0);
     }
 
+    // Fail closed: only an ordinary verification failure (exit 1) may trigger a repair.
+    // Infrastructure errors, cancellations, and timeouts must never be mistaken for dungeon evidence.
+    if (kaneResult.code !== 1) {
+      await writeState(
+        {
+          running: false,
+          phase: "kane_error",
+          round,
+          message: `Kane ended with infrastructure/timeout exit code ${kaneResult.code}; ABLE was not allowed to repair.`,
+        },
+        {
+          speaker: "SYSTEM",
+          text: "Kane did not return a trustworthy gameplay failure. Repair blocked; rerun verification.",
+          status: "failed",
+        }
+      );
+      process.exit(kaneResult.code || 2);
+    }
+
     await writeState(
       {
         running: true,

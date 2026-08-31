@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="KANE vs. ABLE — player-only dungeon surface for independent browser verification." />
+    <title>KANE vs. ABLE — Dungeon</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/play.css" />
+  </head>
+  <body class="player-body">
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <main class="player-shell" aria-label="KANE escape room challenge">
+      <header class="player-header">
+        <div>
+          <p class="eyebrow">INDEPENDENT BROWSER CHALLENGE</p>
+          <h1><span class="kane">KANE</span> <span class="versus">vs.</span> <span class="able">ABLE</span></h1>
+          <p class="player-note">No dashboard. No solution. Just the dungeon.</p>
+        </div>
+        <div id="room-version" class="header-badge">ROOM</div>
+      </header>
+
+      <section class="player-panel">
+        <div class="room-heading">
+          <div>
+            <p class="section-label">CURRENT CHALLENGE</p>
+            <h2 id="room-title">Loading dungeon…</h2>
+            <p id="room-description" class="room-description"></p>
+          </div>
+        </div>
+
+        <div class="player-rules" aria-label="Challenge rules">
+          <strong>OBJECTIVE</strong>
+          <span>Explore the room, obtain the required item, derive the four-digit code from discovered clues, and escape.</span>
+        </div>
+
+        <div class="challenge-strip player-strip">
+          <div>
+            <span class="strip-label">CLUE ORDER</span>
+            <strong id="exit-sequence">—</strong>
+          </div>
+          <div>
+            <span class="strip-label">EXIT REQUIREMENT</span>
+            <strong id="exit-requirement">—</strong>
+          </div>
+        </div>
+
+        <div id="room-stage" class="room-stage" aria-label="Interactive room objects"></div>
+
+        <div class="player-state-grid">
+          <section class="state-box">
+            <p class="section-label">INVENTORY</p>
+            <div id="inventory" class="inventory"></div>
+          </section>
+          <section class="state-box">
+            <p class="section-label">DISCOVERED CLUES</p>
+            <div id="clues" class="clues"></div>
+          </section>
+        </div>
+
+        <section class="exit-box">
+          <div>
+            <p class="section-label">FINAL LOCK</p>
+            <h3>Four-digit keypad</h3>
+            <p>Enter only the code you can derive from clues you actually discovered.</p>
+          </div>
+          <form id="exit-form" class="exit-form">
+            <label for="exit-code">Exit code</label>
+            <div class="exit-entry">
+              <input id="exit-code" name="exit-code" type="text" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Four digit exit code" />
+              <button type="submit" class="primary-button">TRY EXIT</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="activity-box">
+          <p class="section-label">OBSERVED ROOM EVENTS</p>
+          <div id="activity-log" class="activity-log" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <div id="win-overlay" class="win-overlay" hidden>
+      <div class="win-card player-win-card">
+        <div class="win-character-stage" aria-hidden="true">
+          <img src="/assets/sprites/kane/victory.png" alt="" class="pixel-sprite win-kane-sprite" />
+          <div class="win-vs">VS</div>
+          <img src="/assets/sprites/able/glitch.png" alt="" class="pixel-sprite win-able-sprite" />
+        </div>
+        <p class="section-label">BROWSER-OBSERVED SUCCESS</p>
+        <h2>YOU ESCAPED</h2>
+        <p>The final lock opened. This dungeon has a reachable completion path.</p>
+      </div>
+    </div>
+
+    <!-- Optional game.js hooks intentionally hidden from the player surface. -->
+    <div class="player-hooks" aria-hidden="true">
+      <span id="able-confidence"></span>
+      <span id="able-message"></span>
+      <span id="confidence-number"></span>
+      <span id="confidence-fill"></span>
+    </div>
+
+    <script type="module" src="/src/play.js"></script>
+  </body>
+</html>

@@ -1,291 +1,263 @@
 # KANE vs. ABLE
 
-> v0.2: autonomous duel button, before/after dependency evidence, and Kane-extracted exit code.
-
 **Can one AI build an escape room another AI can prove is solvable?**
 
-KANE vs. ABLE is a deliberately small browser game built around a larger idea:
+KANE vs. ABLE is an adversarial browser-verification game built for the TestMu AI Kane CLI Online Hackathon.
 
-1. **ABLE** (Artificial Builder of Labyrinthine Escapes), an AI coding agent acting as Dungeon Master, creates a room definition.
-2. **Kane CLI** attempts the room through the real browser UI without being given the solution.
-3. Kane returns a structured `run_end` result.
-4. A failed result becomes feedback for ABLE.
-5. ABLE repairs the room definition — **not the test**.
-6. Kane runs again and proves the repaired room is solvable.
+- **ABLE** — Artificial Builder of Labyrinthine Escapes — is an AI Dungeon Master powered by a coding agent.
+- **Kane CLI** is the independent browser verifier.
+- ABLE claims its generated dungeon is solvable.
+- Kane explores only the visible browser UI and attempts to prove that claim.
+- If Kane finds a real blocker, its structured result is fed back to ABLE.
+- ABLE must repair the dungeon **without weakening Kane's verification**.
+- Kane automatically re-enters and verifies the repaired version.
 
-The included demo room starts with a genuine circular item dependency so the first Kane attempt has something meaningful to discover.
+The included first dungeon contains a genuine reachability defect: the Silver Key needed to open a chest is initially inside that same chest.
 
----
+## 30-second orientation
 
-## Quick Start
+Start the app:
 
-### Prerequisites
+```bash
+npm start
+```
 
-The web app itself has no npm dependencies, but the full autonomous duel requires these tools to already be installed and authenticated:
+Open:
 
-- Node.js
+```text
+http://localhost:4173
+```
+
+The human/judge watches `/`. Kane is sent to the separate player-only surface at:
+
+```text
+http://localhost:4173/play
+```
+
+Click **RESET DEMO**, then **BEGIN DUEL**.
+
+## Prerequisites for the full live duel
+
+The application itself has no project-level npm dependencies. The autonomous agents are external prerequisites:
+
+- Node.js 20+
 - Google Chrome
 - Kane CLI authenticated with TestMu AI
 - Codex CLI authenticated with OpenAI
 
-Install and authenticate Kane:
+Install/authenticate Kane:
 
 ```bash
 npm install -g @testmuai/kane-cli
 kane-cli login
 ```
 
-Install and authenticate Codex:
+Install/authenticate Codex:
 
 ```bash
 npm install -g @openai/codex
 codex login
 ```
 
-### Run the app
-
-From the project folder:
+Then:
 
 ```bash
 npm start
 ```
 
-Then open:
+Optional preflight:
+
+```bash
+npm run preflight
+```
+
+## What happens during BEGIN DUEL
 
 ```text
-http://localhost:4173
+ABLE claims room is solvable
+        ↓
+Kane opens /play in Chrome
+        ↓
+Kane exhausts visible interactions
+        ↓
+PASS? ───────────────→ verified escape
+  │
+  no
+  ↓
+structured Kane evidence
+        ↓
+ABLE / Codex repairs rooms/current-room.json
+        ↓
+room schema is validated
+        ↓
+Kane opens /play again
+        ↓
+verified PASS or another repair round
 ```
 
-For the demo flow:
+The dashboard visualizes the exact dependency graph stored with each Kane attempt, but that graph does **not** decide Kane's verdict. Kane must discover the gameplay blocker through browser interaction.
 
-1. Click **RESET DEMO**.
-2. Click **BEGIN DUEL**.
-3. Kane attempts the dungeon in Chrome.
-4. If Kane fails, its structured result is passed to ABLE.
-5. ABLE uses Codex to repair `rooms/current-room.json`.
-6. Kane automatically re-enters and verifies the repaired dungeon.
+## Integrity rules
 
-> Once Kane and Codex are installed and authenticated, the application itself runs with a single command: `npm start`.
+ABLE may repair the dungeon, but it may not:
 
-### Important
+- edit Kane's objective/test to accommodate a bad room;
+- hard-code a passing result;
+- remove the exit requirement merely to force success;
+- reveal the exit code to Kane;
+- fabricate verification history;
+- replace a live repair with the known-fixed template.
 
-`npm start` does **not** install or authenticate Kane or Codex. A fresh machine must complete the prerequisite setup above before the autonomous duel can work.
+The repair should be the smallest legitimate change to restore a reachable user path.
 
+## Why `/play` exists
 
-## Requirements
+The dashboard contains BEGIN DUEL, RESET DEMO, graphs, history, sprites, and ABLE's commentary. Those are useful to a judge but irrelevant to a player.
 
-- Node.js (Node 20+ recommended)
-- Google Chrome
-- Kane CLI / TestMu AI account
+Kane therefore receives a dedicated `/play` route containing only:
 
-Install Kane:
+- visible room objects;
+- inventory;
+- discovered clues;
+- exit requirements;
+- keypad;
+- observable room-event log.
 
-```bash
-npm install -g @testmuai/kane-cli
-kane-cli login
-```
+Kane is explicitly instructed to inspect **every visible object at least once** before concluding that the room is impossible.
 
-Kane's current documentation recommends `--agent` when another agent or script consumes the result because it returns NDJSON and a stable `run_end` event. This project parses that terminal event in `scripts/run-kane.mjs`.
+## Cloud/container support
 
-Optional, if you are using a supported coding-agent CLI:
+v0.7 adds the foundation for Railway/Render deployment:
 
-```bash
-npx @testmuai/kane-cli-skill
-```
+- server binds to `0.0.0.0:$PORT`;
+- Kane supports `--headless` automatically in Railway/Render;
+- Kane can use non-interactive `KANE_USERNAME` / `KANE_ACCESS_KEY` credentials;
+- Docker image includes Google Chrome, Kane CLI, and Codex CLI;
+- Codex can authenticate non-interactively from `OPENAI_API_KEY` at container startup;
+- `/health` and `/api/runtime-status` expose non-secret runtime readiness information;
+- only one duel may run at a time;
+- optional `DUEL_COOLDOWN_SECONDS` prevents rapid repeated launches.
 
----
+See [`RAILWAY.md`](RAILWAY.md).
 
-## Run the app
+**Important:** cloud live-agent execution defaults to disabled unless `LIVE_DUEL_ENABLED=1` is explicitly set. Agent execution can consume Kane credits and OpenAI API usage, so public judge access controls/rate limits should be finalized before enabling it on an unrestricted public URL.
 
-There are intentionally **no project-level application dependencies** to install.
+## CI/headless variables
 
-```bash
-npm start
-```
-
-Then open:
+Kane accepts either pair:
 
 ```text
-http://localhost:4173
+KANE_USERNAME
+KANE_ACCESS_KEY
 ```
 
-The project uses a tiny Node static server, so no framework or build-tool setup is required.
-
----
-
-## Run the demo loop
-
-In a second terminal:
-
-```bash
-npm run demo:prepare
-npm run verify:kane
-```
-
-The first Kane run is expected to fail because the included room is logically impossible.
-
-After Kane fails, ask your coding agent:
-
-> Act as ABLE. Read `AGENTS.md` and `verification/kane-feedback.md`. Repair `rooms/current-room.json` without modifying the Kane verification or weakening the game. Run `npm run verify:kane` again until Kane proves the dungeon solvable.
-
-The browser polls `verification/history.json` every few seconds, so the verification panel updates as Kane attempts the room.
-
----
-
-## What the first failure is designed to demonstrate
-
-The broken room contains a circular dependency:
+or:
 
 ```text
-Silver Key
-   ↓ required to open
-Moon-Locked Chest
-   ↓ contains
-Silver Key + Moon Seal
-   ↓
-Exit requires Moon Seal
+LT_USERNAME
+LT_ACCESS_KEY
 ```
 
-The exit cannot be brute-forced because the keypad also requires the Moon Seal.
+Headless mode can be forced locally with:
 
-ABLE should reason from Kane's inability to progress and move the Silver Key somewhere accessible. The known-fixed template demonstrates one valid repair, but the AI agent should make the live fix itself.
+```bash
+KANE_HEADLESS=1 npm run verify:kane
+```
 
----
+Codex container authentication can use:
+
+```text
+OPENAI_API_KEY
+```
+
+The key is never committed to the project.
 
 ## Project structure
 
 ```text
 kane-vs-able/
-├── index.html
-├── package.json
-├── AGENTS.md
-├── ABLE_START_HERE.md
-├── src/
-│   ├── game.js
-│   ├── main.js
-│   └── style.css
+├── index.html                  # human/judge dashboard
+├── play.html                   # Kane-only dungeon surface
+├── Dockerfile
+├── RAILWAY.md
+├── AGENTS.md                   # ABLE's repair contract
 ├── rooms/
 │   ├── current-room.json
 │   └── templates/
-│       ├── broken-room.json
-│       └── fixed-room.json
-├── tests/
-│   └── escape-room_test.md
 ├── scripts/
 │   ├── server.mjs
+│   ├── duel.mjs
 │   ├── run-kane.mjs
-│   ├── select-room.mjs
-│   └── reset-history.mjs
+│   ├── graph-analysis.mjs
+│   ├── preflight.mjs
+│   └── docker-entrypoint.sh
+├── src/
+│   ├── game.js
+│   ├── main.js
+│   ├── play.js
+│   ├── style.css
+│   └── play.css
+├── tests/
+│   └── escape-room_test.md
 └── verification/
     ├── history.json
+    ├── duel-state.json
     └── kane-feedback.md
 ```
-
----
 
 ## Useful commands
 
 ```bash
 npm start
 ```
-
-Start the local site on port `4173`.
+Start the dashboard and player surface.
 
 ```bash
 npm run demo:prepare
 ```
+Reset history and restore ABLE's deliberately impossible v1 room.
 
-Reset verification history and load the deliberately broken room.
+```bash
+npm run duel
+```
+Launch the autonomous Kane → ABLE → Kane loop directly from Terminal.
 
 ```bash
 npm run verify:kane
 ```
-
-Run Kane in `--agent` mode, parse the `run_end` event, append it to the UI history, and write a repair brief for ABLE.
+Run one Kane browser verification against `/play` and write structured ABLE feedback.
 
 ```bash
-npm run test:kane
+npm run preflight
 ```
-
-Run the committed Markdown Kane test directly.
+Check whether Kane/Codex executables and cloud-style auth variables are available without printing secrets.
 
 ```bash
 npm run room:broken
 npm run room:fixed
 ```
+Load the reference templates manually. `room:fixed` is a development backup, not the live repair path.
 
-Load the broken or known-fixed template. The fixed template is a backup/reference, not the main closed-loop demo.
+## Evidence integrity
 
-```bash
-npm run verify:reset
+The code displayed as "Kane discovered" comes from:
+
+```text
+run_end.final_state.discovered_code
 ```
 
-Clear verification history.
+—not from `rooms/current-room.json`.
 
----
+Each verification history entry stores the exact room version and dependency graph Kane attempted, plus the Kane evidence URL when one is returned.
 
-## The integrity rule
+## Character rule
 
-The point of the project is the feedback loop.
+ABLE never says "bug" if a more dignified phrase is available.
 
-If Kane fails, **do not change Kane to make it pass**.
-
-Change the dungeon.
-
-That is the product.
-
-
----
-
-## v0.2 competition demo
-
-Start the server:
-
-```bash
-npm start
-```
-
-In the browser:
-
-1. Click **RESET DEMO**.
-2. Click **BEGIN DUEL**.
-3. Kane launches from the local server.
-4. The Live Duel panel streams Kane/ABLE state from `verification/duel-state.json`.
-5. The first Kane run stores the exact dependency graph it attempted.
-6. On failure, ABLE's agent receives `verification/kane-feedback.md`.
-7. ABLE repairs `rooms/current-room.json`.
-8. Kane re-enters automatically.
-9. A successful run displays the code Kane independently stored as `discovered_code`.
-10. The UI shows the failed and repaired graphs side by side.
-
-See `DUEL_MODE.md` for coding-agent configuration.
-
-
----
-
-## ABLE as a character
-
-ABLE now has a scripted reactive character layer.
-
-Real duel phases drive ABLE through states such as `smug`, `defensive`, `repairing`, and `vindicated`. The state affects ABLE's title, avatar, dialogue, and deliberately-not-scientific confidence meter.
-
-If Kane detects a circular dependency, ABLE's confidence display glitches before collapsing.
-
-ABLE's sidebar also tracks "dignity metrics," including the canonical:
+Canonical metric:
 
 ```text
 Times admitting fault: 0
 ```
 
-See `ABLE_CHARACTER.md`.
-
-
----
-
-## v0.4 — pixel character sprites
-
-Kane and ABLE now have state-driven retro character portraits.
-
-Kane moves through idle → investigating → evidence → victory. ABLE moves through smug/amused → glitching when caught → architect mode while repairing. The portraits appear in ABLE's character card, the live duel stage, and the win overlay.
-
-See `SPRITES.md`.
+See [`ABLE_CHARACTER.md`](ABLE_CHARACTER.md) and [`SPRITES.md`](SPRITES.md).

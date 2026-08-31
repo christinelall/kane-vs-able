@@ -1,5 +1,9 @@
 # Autonomous Duel Mode
 
+## v0.7 reliability change
+
+Kane now navigates to `http://localhost:4173/play`, a player-only surface that contains the dungeon and nothing else. The dashboard remains at `/` for the human/judge. This prevents Kane from mistaking orchestration controls for gameplay.
+
 ## What changed in v0.2
 
 The project now has three competition-focused upgrades:
@@ -29,10 +33,10 @@ Click **RESET DEMO**, then **BEGIN DUEL**.
 The orchestrator auto-detects Codex and invokes:
 
 ```bash
-codex exec --sandbox workspace-write -
+codex exec --skip-git-repo-check --sandbox workspace-write "<repair prompt>"
 ```
 
-The repair prompt is provided through stdin. Codex is told to modify the dungeon, not the Kane verification.
+The repair prompt is passed directly to Codex. `--skip-git-repo-check` keeps the downloaded hackathon project runnable even when Git tooling is unavailable. Codex is told to modify the dungeon, not the Kane verification.
 
 ## Another coding agent
 

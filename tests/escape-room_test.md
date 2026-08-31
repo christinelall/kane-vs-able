@@ -1,22 +1,25 @@
 ---
 mode: testing
-max_steps: 35
+max_steps: 40
 headless: false
 ---
 
 # Kane vs. ABLE — prove the dungeon is solvable
 
-## Enter the dungeon
-Open http://localhost:4173. Verify that the Kane vs. ABLE escape room is visible.
+## Enter the player-only dungeon
+Open http://localhost:4173/play. Verify that the Kane vs. ABLE escape room is visible.
 
-## Explore the room
-Explore the visible interactive objects in the room. Collect any available items and discover all useful clues. Work only through the visible browser UI; do not inspect source code or developer tools.
+## Exhaust visible interactions
+Inspect every visible room object at least once. If an object is locked, note its required item and continue attempting every other visible object. Work only through the visible browser UI; do not inspect source code, network data, hidden state, or developer tools.
 
-## Solve the dependency
-Use any collected items to unlock objects that were previously inaccessible. Continue until you have everything required by the exit mechanism.
+## Collect reachable evidence
+Collect items and clues only when the browser visibly reveals them. If a newly collected item unlocks an object, return to that object and inspect it.
+
+## Determine reachability
+Do not declare the room impossible until every visible room object has been attempted and a required item or clue still has no reachable acquisition path. If impossible, fail and identify the blocking object/item dependency by its visible name.
 
 ## Determine the code
-Use the visible clue sequence and the clues you discovered to determine the four-digit exit code.
+If all required clues are reachable, use the visible color sequence and only the clues you actually discovered to derive the four-digit exit code. Do not guess a missing digit. Store the independently derived code as `discovered_code`.
 
 ## Escape
 Enter the four-digit code into the exit keypad and unlock the door. Verify that the page displays "YOU ESCAPED".

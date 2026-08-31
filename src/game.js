@@ -18,23 +18,31 @@ export class EscapeRoomGame {
   }
 
   renderRoomMeta() {
-    this.el.roomTitle.textContent = this.room.name;
-    this.el.roomDescription.textContent = this.room.description;
-    this.el.roomVersion.textContent = `ROOM ${this.room.version}`;
-    this.el.exitSequence.textContent = this.room.exit.sequence
-      .map((part) => part.toUpperCase())
-      .join(" → ");
+    if (this.el.roomTitle) this.el.roomTitle.textContent = this.room.name;
+    if (this.el.roomDescription) this.el.roomDescription.textContent = this.room.description;
+    if (this.el.roomVersion) this.el.roomVersion.textContent = `ROOM ${this.room.version}`;
+    if (this.el.exitSequence) {
+      this.el.exitSequence.textContent = this.room.exit.sequence
+        .map((part) => part.toUpperCase())
+        .join(" → ");
+    }
 
     const confidence = Number(this.room.able?.confidence ?? 50);
-    this.el.ableConfidence.textContent = `${confidence}% solvable`;
-    this.el.ableMessage.textContent = `“${this.room.able?.message ?? "I made a room."}”`;
-    this.el.confidenceNumber.textContent = `${confidence}%`;
-    this.el.confidenceFill.style.width = `${Math.max(0, Math.min(100, confidence))}%`;
+    if (this.el.ableConfidence) this.el.ableConfidence.textContent = `${confidence}% solvable`;
+    if (this.el.ableMessage) {
+      this.el.ableMessage.textContent = `“${this.room.able?.message ?? "I made a room."}”`;
+    }
+    if (this.el.confidenceNumber) this.el.confidenceNumber.textContent = `${confidence}%`;
+    if (this.el.confidenceFill) {
+      this.el.confidenceFill.style.width = `${Math.max(0, Math.min(100, confidence))}%`;
+    }
 
     const required = this.room.exit.requires;
-    this.el.exitRequirement.textContent = required
-      ? `A ${required.name} must be fitted before the keypad will accept a code.`
-      : "The keypad is active.";
+    if (this.el.exitRequirement) {
+      this.el.exitRequirement.textContent = required
+        ? `A ${required.name} must be fitted before the keypad will accept a code.`
+        : "The keypad is active.";
+    }
   }
 
   renderObjects() {
@@ -140,7 +148,7 @@ export class EscapeRoomGame {
     if (code === String(this.room.exit.code)) {
       this.won = true;
       this.log("The lock opens. Kane has proved the dungeon is solvable.", "passed");
-      this.el.winOverlay.hidden = false;
+      if (this.el.winOverlay) this.el.winOverlay.hidden = false;
       this.toast("KANE ESCAPED");
     } else {
       this.log(`Code ${code} is rejected by the final lock.`, "failed");
@@ -149,9 +157,9 @@ export class EscapeRoomGame {
   }
 
   bindReset() {
-    this.el.resetButton.addEventListener("click", () => window.location.reload());
-    this.el.closeWin.addEventListener("click", () => {
-      this.el.winOverlay.hidden = true;
+    this.el.resetButton?.addEventListener("click", () => window.location.reload());
+    this.el.closeWin?.addEventListener("click", () => {
+      if (this.el.winOverlay) this.el.winOverlay.hidden = true;
     });
   }
 
@@ -214,6 +222,7 @@ export class EscapeRoomGame {
   }
 
   toast(message) {
+    if (!this.el.toast) return;
     this.el.toast.textContent = message;
     this.el.toast.classList.add("visible");
     clearTimeout(this.toastTimer);

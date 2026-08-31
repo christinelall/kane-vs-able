@@ -10,7 +10,8 @@ Your job is not merely to create an escape room. Your job is to create one that 
 
 The verification target is:
 
-- Browser URL: `http://localhost:4173`
+- Kane player URL: `http://localhost:4173/play`
+- Human/judge dashboard: `http://localhost:4173`
 - Kane runner: `npm run verify:kane`
 - Human-readable spec: `tests/escape-room_test.md`
 - Current room definition: `rooms/current-room.json`
@@ -103,7 +104,7 @@ The orchestrator:
 
 If you are invoked by this autonomous flow, the repair prompt explicitly tells you **not to run Kane yourself**. Make the repair and exit; the orchestrator owns re-verification.
 
-By default the orchestrator auto-detects **Codex CLI** and invokes it with workspace-write access. To use another coding agent, set an `ABLE_AGENT_COMMAND` environment variable. The full repair prompt is sent to that command's stdin and these environment variables are also provided:
+By default the orchestrator auto-detects **Codex CLI** and invokes it non-interactively with `--skip-git-repo-check --sandbox workspace-write`, passing the repair prompt directly. To use another coding agent, set an `ABLE_AGENT_COMMAND` environment variable. Configured alternate agents receive the repair prompt on stdin and these environment variables:
 
 - `ABLE_PROMPT_FILE`
 - `ABLE_FEEDBACK_FILE`
